@@ -99,7 +99,6 @@ class Company {
   static async getAndFilter(filterObject) {
     const keys = Object.keys(filterObject);
     const values = Object.values(filterObject);
-    console.log("values = ", values);
 
     if (keys.length === 0) throw new BadRequestError("No data");
 
@@ -108,19 +107,20 @@ class Company {
       console.log("filter = ", filter);
       if (filter === "name") {
 
-        return `name LIKE %$${idx + 1}%`;
+        return `name LIKE '%$${idx + 1}%'`;
       }
       else if (filter === "minEmployees") {
-        return `num_employees <= $${idx + 1}`;
+        return `num_employees >= $${idx + 1}`;
       }
       else if (filter === "maxEmployees") {
-        return `num_employees >= $${idx + 1}`;
+        return `num_employees <= $${idx + 1}`;
       };
     });
 
     let whereClause = cols.join(" AND ");
     console.log("whereClause = ", whereClause);
 
+    console.log("values = ", values);
     const companiesRes = await db.query(
       `SELECT handle,
                   name,
@@ -128,19 +128,19 @@ class Company {
                   num_employees AS "numEmployees",
                   logo_url AS "logoUrl"
              FROM companies
-             WHERE ${whereClause}`, ['Microsoft', 100, 1000],);
+             WHERE ${whereClause}`, ['Microsoft', 100, 1000]);
 
     return companiesRes.rows;
-    }
+  }
 
-//   `SELECT handle,
-//   name,
-//   description,
-//   num_employees AS "numEmployees",
-//   logo_url AS "logoUrl"
-// FROM companies
-//              WHERE name LIKE '%2%' AND numEmployees >= 2 AND numEmployees <= 100;
-// WHERE name LIKE $1 AND numEmployees >= $2 AND numEmployees <= $3; [Object.values(filterObject)]
+  //   `SELECT handle,
+  //   name,
+  //   description,
+  //   num_employees AS "numEmployees",
+  //   logo_url AS "logoUrl"
+  // FROM companies
+  //              WHERE name LIKE '%2%' AND numEmployees >= 2 AND numEmployees <= 100;
+  // WHERE name LIKE $1 AND numEmployees >= $2 AND numEmployees <= $3; [Object.values(filterObject)]
 
 
 
@@ -167,13 +167,13 @@ class Company {
 
     const querySql = `
       UPDATE companies
-      SET ${ setCols }
-        WHERE handle = ${ handleVarIdx }
+      SET ${setCols}
+        WHERE handle = ${handleVarIdx}
         RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`;
     const result = await db.query(querySql, [...values, handle]);
     const company = result.rows[0];
 
-    if (!company) throw new NotFoundError(`No company: ${ handle }`);
+    if (!company) throw new NotFoundError(`No company: ${handle}`);
 
     return company;
   }
@@ -192,7 +192,7 @@ class Company {
       [handle]);
     const company = result.rows[0];
 
-    if (!company) throw new NotFoundError(`No company: ${ handle }`);
+    if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
 }
 

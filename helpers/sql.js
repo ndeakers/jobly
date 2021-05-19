@@ -5,8 +5,6 @@ const { BadRequestError } = require("../expressError");
 /**
  * Function assembles a portion of the sql query string that will perform a partial update
  * to a db record
- * by taking in JavaScript data that will be updated and translating that data into a string
- * that can be used in an sql query.
  *
  takes in dataToUpdate as an object of properties to update on the class instance like:
  { propertyName: newValue, propertyName2: newValue2}
@@ -27,7 +25,7 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
   // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
   const cols = keys.map((colName, idx) =>
-      `"${jsToSql[colName] || colName}"=$${idx + 1}`,
+    `"${jsToSql[colName] || colName}"=$${idx + 1}`,
   );
 
   return {

@@ -47,6 +47,10 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
+  const filters = req.query;
+  if (Object.keys(filters).length !== 0) {
+    await Company.getAndFilter(filters);
+  }
   const companies = await Company.findAll();
   return res.json({ companies });
 });

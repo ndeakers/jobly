@@ -92,56 +92,59 @@ class Company {
     return company;
   }
 
-
-  /* Takes in object with up to 3 keys: {name, min, max}
-  Returns array of all companies that match the filters:
-  [{ handle, name, description, numEmployees, logoUrl }, ...]  */
-  static async getAndFilter(filterObject) {
-    const keys = Object.keys(filterObject);
-    const values = Object.values(filterObject);
-
-    if (keys.length === 0) throw new BadRequestError("No data");
+  /*_buildWhereClause takes in object with up to 3 keys: {name, min, max}
+  Builds a WHERE clause like
+  name ILIKE '%'||$1||'%' AND num_employees >= $2 AND num_employees <= $3*/
+  static _buildWhereClause(filters) {
+    const keys = Object.keys(filters);
 
     const cols = keys.map(function (filter, idx) {
-      console.log("idx = ", idx);
-      console.log("filter = ", filter);
       if (filter === "name") {
-
-        return `name LIKE '%$${idx + 1}%'`;
+        return `name ILIKE '%'||$${idx + 1}||'%'`;
       }
       else if (filter === "minEmployees") {
         return `num_employees >= $${idx + 1}`;
       }
       else if (filter === "maxEmployees") {
         return `num_employees <= $${idx + 1}`;
-      };
+      } else {
+        throw new BadRequestError("invalid query string key")
+      }
     });
-
     let whereClause = cols.join(" AND ");
+    return whereClause;
+  }
+
+
+  /* Takes in object with up to 3 keys: {name, min, max}
+  Returns array of all companies that match the filters:
+  [{ handle, name, description, numEmployees, logoUrl }, ...]  */
+  static async getAndFilter(filters = {}) {
+    // const keys = Object.keys(filters);
+    // if (keys.length === 0) throw new BadRequestError("No data");
+
+    if (filters.maxEmployees && filters.minEmployees) { // be in buildwhere
+      if (filters.maxEmployees < filters.minEmployees) {
+        throw new BadRequestError("max employees must be greater than min employees");
+      }
+    }
+
+    let whereClause = Company._buildWhereClause(filters);
+    const values = Object.values(filters);
     console.log("whereClause = ", whereClause);
 
     console.log("values = ", values);
     const companiesRes = await db.query(
       `SELECT handle,
-                  name,
-                  description,
-                  num_employees AS "numEmployees",
-                  logo_url AS "logoUrl"
-             FROM companies
-             WHERE ${whereClause}`, ['Microsoft', 100, 1000]);
+          name,
+          description,
+          num_employees AS "numEmployees",
+            logo_url AS "logoUrl"
+        FROM companies
+        WHERE ${whereClause} `, values);
 
     return companiesRes.rows;
   }
-
-  //   `SELECT handle,
-  //   name,
-  //   description,
-  //   num_employees AS "numEmployees",
-  //   logo_url AS "logoUrl"
-  // FROM companies
-  //              WHERE name LIKE '%2%' AND numEmployees >= 2 AND numEmployees <= 100;
-  // WHERE name LIKE $1 AND numEmployees >= $2 AND numEmployees <= $3; [Object.values(filterObject)]
-
 
 
   /** Update company data with `data`.

@@ -93,23 +93,56 @@ class Company {
   }
 
 
-  /* Takes in: name, min, max object["name"] === undefined */
+  /* Takes in object with up to 3 keys: {name, min, max}
+  Returns array of all companies that match the filters:
+  [{ handle, name, description, numEmployees, logoUrl }, ...]  */
   static async getAndFilter(filterObject) {
     const keys = Object.keys(filterObject);
-    if (keys.length === 0) throw new BadRequestError("No data");
-    const cols = keys.map((colName, idx) =>
-      `"${jsToSql[colName] || colName}"=$${idx + 1}`)
+    const values = Object.values(filterObject);
+    console.log("values = ", values);
 
-    const companies = await db.query(
+    if (keys.length === 0) throw new BadRequestError("No data");
+
+    const cols = keys.map(function (filter, idx) {
+      console.log("idx = ", idx);
+      console.log("filter = ", filter);
+      if (filter === "name") {
+
+        return `name LIKE %$${idx + 1}%`;
+      }
+      else if (filter === "minEmployees") {
+        return `num_employees <= $${idx + 1}`;
+      }
+      else if (filter === "maxEmployees") {
+        return `num_employees >= $${idx + 1}`;
+      };
+    });
+
+    let whereClause = cols.join(" AND ");
+    console.log("whereClause = ", whereClause);
+
+    const companiesRes = await db.query(
       `SELECT handle,
                   name,
                   description,
                   num_employees AS "numEmployees",
                   logo_url AS "logoUrl"
              FROM companies
-             WHERE ${keys} = 
+             WHERE ${whereClause}`, ['Microsoft', 100, 1000],);
 
-  }
+    return companiesRes.rows;
+    }
+
+//   `SELECT handle,
+//   name,
+//   description,
+//   num_employees AS "numEmployees",
+//   logo_url AS "logoUrl"
+// FROM companies
+//              WHERE name LIKE '%2%' AND numEmployees >= 2 AND numEmployees <= 100;
+// WHERE name LIKE $1 AND numEmployees >= $2 AND numEmployees <= $3; [Object.values(filterObject)]
+
+
 
   /** Update company data with `data`.
    *

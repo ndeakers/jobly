@@ -87,6 +87,35 @@ describe("findAll", function () {
   });
 });
 
+/************************************** getAndFilter */
+/* Takes in object with up to 3 keys: {name, min, max}
+  Returns array of all companies that match the filters:
+  [{ handle, name, description, numEmployees, logoUrl }, ...]  */
+describe("getAndFilter", function () {
+  test("works", async function () {
+    let filters = { name: "2" }
+    let companies = await Company.getAndFilter(filters);
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+    ])
+  });
+
+  test("fails to find company that matches filters", async function () {
+    let filters = {name: "Microsoft", minEmployees: 100, maxEmployees: 1000};
+    let companies = await Company.getAndFilter(filters);
+    expect(companies).toEqual([]);
+  });
+});
+
+
+
+
 /************************************** get */
 
 describe("get", function () {

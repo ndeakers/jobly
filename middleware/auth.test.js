@@ -5,7 +5,8 @@ const { UnauthorizedError } = require("../expressError");
 const {
   authenticateJWT,
   ensureLoggedIn,
-  ensureIsAdmin
+  ensureIsAdmin,
+  ensureIsAdminOrOwner
 } = require("./auth");
 
 
@@ -101,4 +102,66 @@ describe("ensureIsAdmin", function () {
     };
     ensureIsAdmin(req, res, next);
   });
+});
+
+
+describe("ensureIsAdminOrOwner", function () {
+  test("works with same user who is also admin", function () {
+    expect.assertions(1);
+    const req = { params: { username: "test" } };
+    const res = { locals: { user: { username: "test", isAdmin: true } } };
+    const next = function (err) {
+      console.log('what is err', err);
+      expect(err).toBeFalsy();
+    };
+    ensureIsAdminOrOwner(req, res, next);
+  });
+
+  test("works with same user who is not admin", function () {
+    expect.assertions(1);
+    const req = { params: { username: "test" } };
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
+    const next = function (err) {
+      console.log('what is err', err);
+      expect(err).toBeFalsy();
+    };
+    ensureIsAdminOrOwner(req, res, next);
+  });
+
+  test("unauth if not an admin and not same user", function () {
+    expect.assertions(1);
+    const req = { params: { username: "test1" } };;
+    const res = {
+      locals: { user: { username: "test", isAdmin: false } }
+    };
+    const next = function (err) {
+      expect(err instanceof UnauthorizedError).toBeTruthy();
+    };
+    ensureIsAdminOrOwner(req, res, next);
+  });
+
+  test("works if admin but not same user", function () {
+    expect.assertions(1);
+    const req = { params: { username: "test1" } };;
+    const res = {
+      locals: { user: { username: "test", isAdmin: true } }
+    };
+    const next = function (err) {
+      expect(err).toBeFalsy();
+    };
+    ensureIsAdminOrOwner(req, res, next);
+  });
+
+  test("Error if username and req.params are both undefined", function () {
+    //expect.assertions(1);
+    const req = { params: { username: undefined } };;
+    const res = {
+      locals: { user: { username: undefined , isAdmin: false } }
+    };
+    const next = function (err) {
+      expect(err instanceof UnauthorizedError).toBeTruthy();
+    };
+    ensureIsAdminOrOwner(req, res, next);
+  });
+
 });

@@ -222,12 +222,29 @@ describe("GET /users/:username", function () {
     expect(resp.statusCode).toEqual(404);
   });
 
-  test("401 error if logged-in but not admin", async function () {
+  test("401 error if logged-in but not admin and searching for different user", async function () {
     const resp = await request(app)
-        .get(`/users/u1`)
+        .get(`/users/u2`)
         .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
 });
+
+  test("works for non-admin user searching own account", async function () {
+    const resp = await request(app)
+        .get(`/users/u1`)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({
+      user: {
+        username: "u1",
+        firstName: "U1F",
+        lastName: "U1L",
+        email: "user1@user.com",
+        isAdmin: false,
+      },
+    });
+});
+
+
 });
 
 /************************************** PATCH /users/:username */
@@ -300,21 +317,39 @@ describe("PATCH /users/:username", () => {
     expect(isSuccessful).toBeTruthy();
   });
 
-  test("401 error if logged-in but not admin", async function () {
+  test("401 error if logged-in but not admin and updating not own account", async function () {
     const resp = await request(app)
-        .patch(`/users/u1`)
+        .patch(`/users/u2`)
         .send({
           firstName: "New",
         })
         .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
 });
+
+test("works for updating own account", async function () {
+  const resp = await request(app)
+      .patch(`/users/u1`)
+      .send({
+        firstName: "NewNew",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
+  expect(resp.body).toEqual({
+    user: {
+      username: "u1",
+      firstName: "NewNew",
+      lastName: "U1L",
+      email: "user1@user.com",
+      isAdmin: false,
+    },
+  });
+});
 });
 
 /************************************** DELETE /users/:username */
 
 describe("DELETE /users/:username", function () {
-  test("works for users", async function () {
+  test("works for admin", async function () {
     const resp = await request(app)
         .delete(`/users/u1`)
         .set("authorization", `Bearer ${u4Token}`);
@@ -334,10 +369,17 @@ describe("DELETE /users/:username", function () {
     expect(resp.statusCode).toEqual(404);
   });
 
-  test("401 error if logged-in but not admin", async function () {
+  test("401 error if logged-in but not admin or deleing own account", async function () {
+    const resp = await request(app)
+        .delete(`/users/u2`)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("works for user not admin but deleting own account", async function () {
     const resp = await request(app)
         .delete(`/users/u1`)
         .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.statusCode).toEqual(401);
+    expect(resp.body).toEqual({ deleted: "u1" });
   });
 });

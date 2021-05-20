@@ -58,7 +58,7 @@ router.get("/", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) {
  *
  * Returns { username, firstName, lastName, isAdmin }
  *
- * Authorization required: login, admin, or owner of account
+ * Authorization required: admin or owner of account
  **/
 
 router.get("/:username", ensureLoggedIn, ensureIsAdminOrOwner, async function (req, res, next) {
@@ -74,7 +74,7 @@ router.get("/:username", ensureLoggedIn, ensureIsAdminOrOwner, async function (r
  *
  * Returns { username, firstName, lastName, email, isAdmin }
  *
- * Authorization required: login, admin, or owner of account
+ * Authorization required: admin or owner of account
  **/
 
 router.patch("/:username", ensureLoggedIn, ensureIsAdminOrOwner, async function (req, res, next) {
@@ -91,7 +91,7 @@ router.patch("/:username", ensureLoggedIn, ensureIsAdminOrOwner, async function 
 
 /** DELETE /[username]  =>  { deleted: username }
  *
- * Authorization required: login, admin, or owner of account
+ * Authorization required: admin or owner of account
  **/
 
 router.delete("/:username", ensureLoggedIn, ensureIsAdminOrOwner, async function (req, res, next) {

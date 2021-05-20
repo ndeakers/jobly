@@ -50,7 +50,7 @@ function ensureLoggedIn(req, res, next) {
  */
 function ensureIsAdmin(req, res, next) {
   try {
-    if (!res.locals.user.isAdmin) throw new UnauthorizedError("Admins only");
+    if (!res.locals.user.isAdmin === true) throw new UnauthorizedError("Admins only");
     return next();
   } catch (err) {
     return next(err);
@@ -62,11 +62,13 @@ function ensureIsAdmin(req, res, next) {
  * If not, raises unauthorized.
  */
 function ensureIsAdminOrOwner(req, res, next) {
+  console.log("req.params", req.params);
   try {
-    if (!res.locals.user.isAdmin || res.locals.username !== req.params.username) {
-      throw new UnauthorizedError("Unauthorized");
+    if ((res.locals.user.isAdmin === true) ||
+      (res.locals.user.username && res.locals.user.username === req.params.username)) {
+      return next();
     }
-    return next();
+    throw new UnauthorizedError("Unauthorized");
   } catch (err) {
     return next(err);
   }

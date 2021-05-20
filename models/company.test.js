@@ -87,47 +87,10 @@ describe("findAll", function () {
   });
 });
 
-/************************************** _buildWhereClause */
-describe("_whereClauseBuilder", function () {
-  test("works with three inputs", async function () {
-    let filters = { name: "C", minEmployees: 1, maxEmployees: 2 }
-    let whereClause = await Company._buildWhereClause(filters);
-    expect(whereClause).toEqual("name ILIKE '%'||$1||'%' AND num_employees >= $2 AND num_employees <= $3")
-  });
-  test("works with one", async function () {
-    let filters = { name: "C" }
-    let whereClause = await Company._buildWhereClause(filters);
-    expect(whereClause).toEqual("name ILIKE '%'||$1||'%'");
-  });
-  test("works with two", async function () {
-    let filters = { name: "C", minEmployees: 1 }
-    let whereClause = await Company._buildWhereClause(filters);
-    expect(whereClause).toEqual("name ILIKE '%'||$1||'%' AND num_employees >= $2");
-  });
-  test("should throw error with invalid input", async function () {
-    try {
-      let filters = { badInput: "C" }
-      let whereClause = await Company._buildWhereClause(filters);
-      console.log("whereClause for bad input", whereClause)
-    }
-    catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-    }
-  });
-});
-
-
-
-
-
-/************************************** getAndFilter */
-/* Takes in object with up to 3 keys: {name, min, max}
-  Returns array of all companies that match the filters:
-  [{ handle, name, description, numEmployees, logoUrl }, ...]  */
-describe("getAndFilter", function () {
+describe("findAll with Filter", function () {
   test("works", async function () {
     let filters = { name: "C", minEmployees: 1, maxEmployees: 2 }
-    let companies = await Company.getAndFilter(filters);
+    let companies = await Company.findAll(filters);
     expect(companies).toEqual([
       {
         handle: "c1",
@@ -146,26 +109,87 @@ describe("getAndFilter", function () {
     ])
   });
 
-  test("fails to find company that matches filters", async function () {
+  test("correctly fails to find company that matches filters", async function () {
     let filters = { name: "Microsoft", minEmployees: 100, maxEmployees: 1000 };
-    let companies = await Company.getAndFilter(filters);
+    let companies = await Company.findAll(filters);
     expect(companies).toEqual([]);
   });
 
   test("throws error if given an empty object ", async function () {
-    try {
       let filters = {};
-      let companies = await Company.getAndFilter(filters);
+      let companies = await Company.findAll(filters);
+      expect(companies).toEqual([
+        {
+          handle: "c1",
+          name: "C1",
+          description: "Desc1",
+          numEmployees: 1,
+          logoUrl: "http://c1.img",
+        },
+        {
+          handle: "c2",
+          name: "C2",
+          description: "Desc2",
+          numEmployees: 2,
+          logoUrl: "http://c2.img",
+        },
+        {
+          handle: "c3",
+          name: "C3",
+          description: "Desc3",
+          numEmployees: 3,
+          logoUrl: "http://c3.img",
+        },
+      ]);
+  });
+});
+
+
+
+/************************************** _buildWhereClause */
+describe("_whereClauseBuilder", function () {
+  test("works with three inputs", async function () {
+    let filters = { name: "C", minEmployees: 1, maxEmployees: 2 }
+    let whereClause = await Company._buildWhereClause(filters);
+    expect(whereClause).toEqual("name ILIKE '%'||$1||'%' AND num_employees >= $2 AND num_employees <= $3")
+  });
+
+  test("works with one", async function () {
+    let filters = { name: "C" }
+    let whereClause = await Company._buildWhereClause(filters);
+    expect(whereClause).toEqual("name ILIKE '%'||$1||'%'");
+  });
+
+  test("works with two", async function () {
+    let filters = { name: "C", minEmployees: 1 }
+    let whereClause = await Company._buildWhereClause(filters);
+    expect(whereClause).toEqual("name ILIKE '%'||$1||'%' AND num_employees >= $2");
+  });
+
+  test("should throw error with invalid input", async function () {
+    try {
+      let filters = { badInput: "C" }
+      let whereClause = await Company._buildWhereClause(filters);
+      console.log("whereClause for bad input", whereClause)
+      fail();
+    }
+    catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
+  });
+
+  test("should throw error with max < min", async function () {
+    try {
+      let filters = { minEmployees: 100, maxEmployees: 1 }
+      let whereClause = await Company._buildWhereClause(filters);
+      console.log("whereClause for bad input", whereClause)
+      fail();
     }
     catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();
     }
   });
 });
-
-
-
-
 
 
 /************************************** get */

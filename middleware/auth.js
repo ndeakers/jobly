@@ -43,8 +43,22 @@ function ensureLoggedIn(req, res, next) {
   }
 }
 
+/**
+ *
+ * TODO:
+ */
+function checkIsAdmin(req, res, next) {
+  if (res.locals.user.isAdmin === true) {
+    return next();
+  }
+  else {
+    throw new UnauthorizedError();
+  }
+}
+
 
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
+  checkIsAdmin,
 };

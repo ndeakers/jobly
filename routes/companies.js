@@ -6,7 +6,7 @@ const jsonschema = require("jsonschema");
 const express = require("express");
 
 const { BadRequestError } = require("../expressError");
-const { ensureLoggedIn, checkIsAdmin } = require("../middleware/auth");
+const { ensureLoggedIn, ensureIsAdmin } = require("../middleware/auth");
 const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
@@ -24,7 +24,7 @@ const router = new express.Router();
  * Authorization required: login, admin
  */
 
-router.post("/", checkIsAdmin, ensureLoggedIn, async function (req, res, next) {
+router.post("/", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) {
   const validator = jsonschema.validate(req.body, companyNewSchema);
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
@@ -76,7 +76,7 @@ router.get("/:handle", async function (req, res, next) {
  * Authorization required: login, admin
  */
 
-router.patch("/:handle", ensureLoggedIn, checkIsAdmin, async function (req, res, next) {
+router.patch("/:handle", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) {
   const validator = jsonschema.validate(req.body, companyUpdateSchema);
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
@@ -92,7 +92,7 @@ router.patch("/:handle", ensureLoggedIn, checkIsAdmin, async function (req, res,
  * Authorization: login, admin
  */
 
-router.delete("/:handle", ensureLoggedIn, checkIsAdmin, async function (req, res, next) {
+router.delete("/:handle", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) {
   await Company.remove(req.params.handle);
   return res.json({ deleted: req.params.handle });
 });

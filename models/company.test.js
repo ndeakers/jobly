@@ -115,7 +115,7 @@ describe("findAll with Filter", function () {
     expect(companies).toEqual([]);
   });
 
-  test("throws error if given an empty object ", async function () {
+  test("finds all if empty object passed in", async function () {
       let filters = {};
       let companies = await Company.findAll(filters);
       expect(companies).toEqual([

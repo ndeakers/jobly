@@ -57,13 +57,16 @@ class Job {
 
     const cols = keys.map(function (filter, idx) {
       if (filter === "title") {
-        return `name ILIKE '%'||$${idx + 1}||'%'`;
+        return `title ILIKE '%'||$${idx + 1}||'%'`;
       }
       else if (filter === "minSalary") {
         return `salary >= $${idx + 1}`;
       }
-      else if (filter === "hasEquity" && filter === true) {
+      else if (filter === "hasEquity" && filters.hasEquity === true) {
         return `equity > 0`;
+      }
+      else if (filter === "hasEquity" && filters.hasEquity === false) {
+        return;
       } else {
         throw new BadRequestError("invalid query string key")
       }
@@ -83,19 +86,21 @@ class Job {
   static async findAll(filters = {}) {
     let whereClause = Job._buildWhereClause(filters);
     const values = Object.values(filters);
-    console.log("whereClause = ", whereClause);
+
 
     if (whereClause) {
       whereClause = "WHERE " + whereClause;
     }
+    console.log("whereClause = ", whereClause);
     const jobRes = await db.query(
-      `SELECT title,
+      `SELECT   id,
+                title,
                 salary,
                 equity,
-                company_handle AS "companyHandle"              
+                company_handle AS "companyHandle"
            FROM jobs
            ${whereClause}
-           ORDER BY title`, values);
+           ORDER BY title`, values); // TODO: values[2] shouldn't be passed in. make values only 2 elements.
     return jobRes.rows;
   }
 
@@ -113,7 +118,7 @@ class Job {
       `SELECT title,
                 salary,
                 equity,
-                company_handle AS "companyHandle"   
+                company_handle AS "companyHandle"
            FROM jobs
            WHERE title = $1`,
       [id]);

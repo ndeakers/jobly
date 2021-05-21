@@ -66,15 +66,15 @@ describe("create", function () {
 //   })
 // });
 
-  // test("bad request with dupe", async function () {
-  //   try {
-  //     await Job.create(newCompany);
-  //     await Job.create(newCompany);
-  //     fail();
-  //   } catch (err) {
-  //     expect(err instanceof BadRequestError).toBeTruthy();
-  //   }
-  // });
+// test("bad request with dupe", async function () {
+//   try {
+//     await Job.create(newCompany);
+//     await Job.create(newCompany);
+//     fail();
+//   } catch (err) {
+//     expect(err instanceof BadRequestError).toBeTruthy();
+//   }
+// });
 
 
 /************************************** _buildWhereClause */
@@ -110,7 +110,29 @@ describe("_whereClauseBuilder", function () {
       expect(err instanceof BadRequestError).toBeTruthy();
     }
   });
-})
+});
+
+/************************************** buildValuesArray */
+describe("_buildValuesArray", function () {
+  test("works with title, minSalary", async function () {
+    let filters = { title: "j", minSalary: 1 }
+    let values = await Job._buildValuesArray(filters);
+    expect(values).toEqual(["j", 1]);
+  });
+  test("works with title, minSalary", async function () {
+    let filters = { title: "j", minSalary: 1, hasEquity: true }
+    let values = await Job._buildValuesArray(filters);
+    expect(values).toEqual(["j", 1]);
+  });
+  test("works with just has Equity", async function () {
+    let filters = { hasEquity: true }
+    let values = await Job._buildValuesArray(filters);
+    expect(values).toEqual([]);
+  });
+});
+
+
+
 
 /************************************** findAll */
 // ('j1', 100, 0, 'c1'),
@@ -177,5 +199,40 @@ describe("findAll with Filter", function () {
         companyHandle: "c2",
       }
     ]);
+  });
+});
+
+/************************************** get */
+
+describe("get", function () {
+  test("works", async function () {
+
+    let id = await db.query(`INSERT INTO jobs(title,
+      salary,
+      equity,
+      company_handle)
+      VALUES ('j3', 1000, 0, 'c1')
+      RETURNING id`);
+
+    id = id.rows[0].id;
+    console.log("This is ID", id)
+
+    let job = await Job.get(id);
+    expect(job).toEqual({
+      id,
+      title: "j3",
+      salary: 1000,
+      equity: "0",
+      companyHandle: "c1",
+    });
+  });
+
+  test("not found if no such job", async function () {
+    try {
+      await Job.get(-10000);
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
   });
 });

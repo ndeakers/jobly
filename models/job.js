@@ -75,6 +75,22 @@ class Job {
     return whereClause;
   }
 
+  /*Takes in a filters object and output an array of values to be passed into 
+  the Where clause in findAll(). 
+  Doesn't add hasEquity to the result since not needed in Where clause 
+  ===> Filters can be {title, minSalary, hasEquity}
+  return [titleValue, minSalaryValue] */
+  static _buildValuesArray(filters) {
+    const valuesArray = [];
+    if (filters.title) {
+      valuesArray.push(filters.title)
+    }
+    if (filters.minSalary) {
+      valuesArray.push(filters.minSalary)
+    }
+    return valuesArray;
+  }
+
 
   /** Find all jobs.
    Takes in optional object with up to 3 keys: {title, minSalary, hasEquity}
@@ -85,7 +101,7 @@ class Job {
 
   static async findAll(filters = {}) {
     let whereClause = Job._buildWhereClause(filters);
-    const values = Object.values(filters);
+    const values = Job._buildValuesArray(filters);
 
 
     if (whereClause) {
@@ -100,14 +116,14 @@ class Job {
                 company_handle AS "companyHandle"
            FROM jobs
            ${whereClause}
-           ORDER BY title`, values); // TODO: values[2] shouldn't be passed in. make values only 2 elements.
+           ORDER BY title`, values);
     return jobRes.rows;
   }
 
   /** Given a job title, return data about that job.
  *
  * Returns { title, salary, equity, company_handle}
- *   where jobs is [{ id, title, salary, equity, companyHandle }, ...]
+ *   where jobs is { id, title, salary, equity, companyHandle }
  *
  * Throws NotFoundError if not found.
  **/
@@ -115,17 +131,18 @@ class Job {
 
   static async get(id) {
     const jobRes = await db.query(
-      `SELECT title,
+      `SELECT   id,
+                title,
                 salary,
                 equity,
                 company_handle AS "companyHandle"
            FROM jobs
-           WHERE title = $1`,
+           WHERE id = $1`,
       [id]);
 
     const job = jobRes.rows[0];
 
-    if (!job) throw new NotFoundError(`No job: ${id}}`);
+    if (!job) throw new NotFoundError(`No job: ${id}`);
 
     return job;
   }

@@ -46,6 +46,8 @@ router.post("/", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) 
  * Returns list of all users.
  *
  * Authorization required: login, admin
+ *
+ * TODO: change return value to include job IDs the user has applied for (after adding applications to model)
  **/
 
 router.get("/", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) {
@@ -59,6 +61,8 @@ router.get("/", ensureLoggedIn, ensureIsAdmin, async function (req, res, next) {
  * Returns { username, firstName, lastName, isAdmin }
  *
  * Authorization required: admin or owner of account
+ *
+ * TODO: change return value to include job IDs the user has applied for (after adding applications to model)
  **/
 
 router.get("/:username", ensureLoggedIn, ensureIsAdminOrOwner, async function (req, res, next) {
@@ -98,6 +102,12 @@ router.delete("/:username", ensureLoggedIn, ensureIsAdminOrOwner, async function
   await User.remove(req.params.username);
   return res.json({ deleted: req.params.username });
 });
+
+/**
+ * TODO: Add a route at POST /users/:username/jobs/:id that allows that user to apply for a job (or an admin to do it for them). That route should return JSON like:
+
+{ applied: jobId }
+ */
 
 
 module.exports = router;

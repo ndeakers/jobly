@@ -22,8 +22,9 @@ class Job {
     //        WHERE handle = $1`,
     //   [handle]);
 
-    // if (duplicateCheck.rows[0])
-    //   throw new BadRequestError(`Duplicate company: ${handle}`);
+    // TODO: decide if duplicate jobs should be allowed and if not, add a check:
+    //          if (duplicateCheck.rows[0])
+    //          throw new BadRequestError(`Duplicate job`);
 
     const result = await db.query(
       `INSERT INTO jobs (
@@ -75,9 +76,9 @@ class Job {
     return whereClause;
   }
 
-  /*Takes in a filters object and output an array of values to be passed into 
-  the Where clause in findAll(). 
-  Doesn't add hasEquity to the result since not needed in Where clause 
+  /*Takes in a filters object and output an array of values to be passed into
+  the Where clause in findAll().
+  Doesn't add hasEquity to the result since not needed in Where clause
   ===> Filters can be {title, minSalary, hasEquity}
   return [titleValue, minSalaryValue] */
   static _buildValuesArray(filters) {
@@ -107,7 +108,7 @@ class Job {
     if (whereClause) {
       whereClause = "WHERE " + whereClause;
     }
-    console.log("whereClause = ", whereClause);
+    console.log("Job.findAll(): whereClause = ", whereClause);
     const jobRes = await db.query(
       `SELECT   id,
                 title,

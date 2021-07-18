@@ -144,8 +144,6 @@ describe("findAll with Filter", function () {
   });
 });
 
-
-
 /************************************** _buildWhereClause */
 describe("_whereClauseBuilder", function () {
   test("works with three inputs", async function () {
@@ -170,7 +168,6 @@ describe("_whereClauseBuilder", function () {
     try {
       let filters = { badInput: "C" }
       let whereClause = await Company._buildWhereClause(filters);
-      console.log("whereClause for bad input", whereClause)
       fail();
     }
     catch (err) {
@@ -182,7 +179,6 @@ describe("_whereClauseBuilder", function () {
     try {
       let filters = { minEmployees: 100, maxEmployees: 1 }
       let whereClause = await Company._buildWhereClause(filters);
-      console.log("whereClause for bad input", whereClause)
       fail();
     }
     catch (err) {
@@ -203,6 +199,12 @@ describe("get", function () {
       description: "Desc1",
       numEmployees: 1,
       logoUrl: "http://c1.img",
+      jobs: [{
+        id: expect.any(Number),
+        title: "j1",
+        salary: 100,
+        equity: "0",
+      }]
     });
   });
 
@@ -215,6 +217,7 @@ describe("get", function () {
     }
   });
 });
+
 
 /************************************** update */
 

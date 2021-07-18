@@ -55,28 +55,6 @@ describe("create", function () {
 });
 
 
-//   test("fails on incomplete data", async function () {
-//     const newJob = {
-//       salary: 5000,
-//       equity: 0,
-//       companyHandle: 'c1',
-//     };
-//     let job = await Job.create(newJob);
-//     expect(job)
-//   })
-// });
-
-// test("bad request with dupe", async function () {
-//   try {
-//     await Job.create(newCompany);
-//     await Job.create(newCompany);
-//     fail();
-//   } catch (err) {
-//     expect(err instanceof BadRequestError).toBeTruthy();
-//   }
-// });
-
-
 /************************************** _buildWhereClause */
 
 describe("_whereClauseBuilder", function () {
@@ -236,3 +214,9 @@ describe("get", function () {
     }
   });
 });
+
+/************************************** update */
+//TODO: add tests for update function
+
+/************************************** remove */
+//TODO: add tests for remove function

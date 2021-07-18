@@ -85,7 +85,6 @@ describe("ensureIsAdmin", function () {
     const req = {};
     const res = { locals: { user: { username: "test", isAdmin: true } } };
     const next = function (err) {
-      console.log('what is err', err);
       expect(err).toBeFalsy();
     };
     ensureIsAdmin(req, res, next);
@@ -111,7 +110,6 @@ describe("ensureIsAdminOrOwner", function () {
     const req = { params: { username: "test" } };
     const res = { locals: { user: { username: "test", isAdmin: true } } };
     const next = function (err) {
-      console.log('what is err', err);
       expect(err).toBeFalsy();
     };
     ensureIsAdminOrOwner(req, res, next);
@@ -122,7 +120,6 @@ describe("ensureIsAdminOrOwner", function () {
     const req = { params: { username: "test" } };
     const res = { locals: { user: { username: "test", isAdmin: false } } };
     const next = function (err) {
-      console.log('what is err', err);
       expect(err).toBeFalsy();
     };
     ensureIsAdminOrOwner(req, res, next);

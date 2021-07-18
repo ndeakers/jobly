@@ -90,7 +90,7 @@ class Company {
   static async findAll(filters={}) {
     let whereClause = Company._buildWhereClause(filters);
     const values = Object.values(filters);
-    console.log("whereClause = ", whereClause);
+    console.log("Company.findAll(): whereClause = ", whereClause);
 
     if (whereClause) {
       whereClause = "WHERE " + whereClause;
@@ -113,6 +113,8 @@ class Company {
    *   where jobs is [{ id, title, salary, equity, companyHandle }, ...]
    *
    * Throws NotFoundError if not found.
+   *
+   * TODO: change return value to include jobs: [ { id, title, salary, equity}, ... ] }
    **/
 
   static async get(handle) {
@@ -127,42 +129,23 @@ class Company {
       [handle]);
 
     const company = companyRes.rows[0];
-
     if (!company) throw new NotFoundError(`No company: ${handle}`);
+
+    const jobsRes = await db.query(
+      `SELECT id,
+              title,
+              salary,
+              equity
+      FROM jobs
+      WHERE company_handle = $1`,
+      [handle]
+    )
+
+    company.jobs = jobsRes.rows
+    console.log("Company.get() company= ", company);
 
     return company;
   }
-
-
-
-  /* Takes in object with up to 3 keys: {name, min, max}
-  Returns array of all companies that match the filters:
-  [{ handle, name, description, numEmployees, logoUrl }, ...]
-
-
-
-  */
-  // static async getAndFilter(filters = {}) {
-  //   // const keys = Object.keys(filters);
-  //   // if (keys.length === 0) throw new BadRequestError("No data");
-
-
-
-
-
-  //   console.log("values = ", values);
-  //   const companiesRes = await db.query(
-  //     `SELECT handle,
-  //         name,
-  //         description,
-  //         num_employees AS "numEmployees",
-  //           logo_url AS "logoUrl"
-  //       FROM companies
-  //       WHERE ${whereClause} `, values);
-
-  //   return companiesRes.rows;
-  // }
-
 
   /** Update company data with `data`.
    *

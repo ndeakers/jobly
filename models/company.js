@@ -52,7 +52,8 @@ class Company {
 
 /*_buildWhereClause takes in object with up to 3 keys: {name, min, max}
   Builds a WHERE clause like
-  name ILIKE '%'||$1||'%' AND num_employees >= $2 AND num_employees <= $3*/
+  name ILIKE '%'||$1||'%' AND num_employees >= $2 AND num_employees <= $3
+  */
   static _buildWhereClause(filters) {
 
     if (filters.maxEmployees && filters.minEmployees) { // be in buildwhereClause

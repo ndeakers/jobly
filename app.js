@@ -26,7 +26,7 @@ app.use("/companies", companiesRoutes);
 app.use("/users", usersRoutes);
 
 
-/** Handle 404 errors -- this matches everything */
+/** Handle 404 errors - this matches everything */
 app.use(function (req, res, next) {
   return next(new NotFoundError());
 });
